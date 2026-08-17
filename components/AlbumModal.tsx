@@ -45,13 +45,16 @@ export default function AlbumModal({
   const [dragging, setDragging] = useState(false);
   const [settling, setSettling] = useState(false);
   const [entered, setEntered] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
   const drag = useRef({
     active: false,
+    pending: false,
     startY: 0,
     lastY: 0,
     lastT: 0,
     y: 0,
     velocity: 0,
+    lockEl: null as HTMLElement | null,
   });
 
   const isMobileSheet = () =>
@@ -67,25 +70,28 @@ export default function AlbumModal({
     });
   }, [closing]);
 
-  const onHandlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (closing || !isMobileSheet()) return;
-    drag.current = {
-      active: true,
-      startY: event.clientY,
-      lastY: event.clientY,
-      lastT: performance.now(),
-      y: 0,
-      velocity: 0,
-    };
+  const startDismiss = (
+    event: ReactPointerEvent<HTMLElement>,
+    startY: number,
+  ) => {
+    drag.current.active = true;
+    drag.current.pending = false;
+    drag.current.startY = startY;
+    drag.current.lastY = event.clientY;
+    drag.current.lastT = performance.now();
+    drag.current.y = Math.max(0, event.clientY - startY);
+    drag.current.velocity = 0;
     setSettling(false);
     setEntered(true);
     setDragging(true);
+    setDragOffset(drag.current.y);
     event.preventDefault();
+    event.currentTarget.style.touchAction = "none";
+    drag.current.lockEl = event.currentTarget;
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
-  const onHandlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!drag.current.active) return;
+  const updateDragOffset = (event: ReactPointerEvent<HTMLElement>) => {
     const next = Math.max(0, event.clientY - drag.current.startY);
     const now = performance.now();
     const elapsed = now - drag.current.lastT;
@@ -98,7 +104,55 @@ export default function AlbumModal({
     setDragOffset(next);
   };
 
-  const onHandlePointerUp = () => {
+  const onHandlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (closing || !isMobileSheet()) return;
+    event.stopPropagation();
+    event.preventDefault();
+    startDismiss(event, event.clientY);
+  };
+
+  const onCoverPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (closing || !isMobileSheet()) return;
+    drag.current = {
+      active: false,
+      pending: true,
+      startY: event.clientY,
+      lastY: event.clientY,
+      lastT: performance.now(),
+      y: 0,
+      velocity: 0,
+      lockEl: null,
+    };
+  };
+
+  const onCoverPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (drag.current.active) {
+      updateDragOffset(event);
+      return;
+    }
+    if (!drag.current.pending) return;
+
+    const dy = event.clientY - drag.current.startY;
+    if (Math.abs(dy) < 10) return;
+
+    const atTop = (sheetRef.current?.scrollTop ?? 0) <= 1;
+    if (dy > 0 && atTop) {
+      startDismiss(event, drag.current.startY);
+      return;
+    }
+
+    drag.current.pending = false;
+  };
+
+  const onHandlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!drag.current.active) return;
+    updateDragOffset(event);
+  };
+
+  const endDrag = () => {
+    drag.current.pending = false;
+    drag.current.lockEl?.style.removeProperty("touch-action");
+    drag.current.lockEl = null;
     if (!drag.current.active) return;
     drag.current.active = false;
     setDragging(false);
@@ -160,10 +214,11 @@ export default function AlbumModal({
         onClick={requestClose}
       />
       <div
+        ref={sheetRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="album-modal-title"
-        className={`relative z-10 max-h-[92vh] w-full max-w-xl cursor-default overflow-y-auto rounded-t-2xl bg-surface shadow-2xl sm:max-w-2xl sm:rounded-2xl ${
+        className={`relative z-10 max-h-[92vh] w-full max-w-xl cursor-default overflow-y-auto overscroll-y-contain rounded-t-2xl bg-surface shadow-2xl sm:max-w-2xl sm:rounded-2xl ${
           usingDragMotion
             ? ""
             : closing
@@ -204,23 +259,6 @@ export default function AlbumModal({
           setSettling(false);
         }}
       >
-        <div
-          className="flex cursor-grab touch-none items-center justify-center py-3 sm:hidden active:cursor-grabbing"
-          aria-label="Drag down to close"
-          onPointerDown={onHandlePointerDown}
-          onPointerMove={onHandlePointerMove}
-          onPointerUp={onHandlePointerUp}
-          onPointerCancel={onHandlePointerUp}
-          onLostPointerCapture={onHandlePointerUp}
-        >
-          <div
-            className={`h-1.5 w-12 rounded-full transition-colors ${
-              dragging ? "bg-white/55" : "bg-white/30"
-            }`}
-            aria-hidden
-          />
-        </div>
-
         <button
           type="button"
           onClick={requestClose}
@@ -230,25 +268,54 @@ export default function AlbumModal({
           <CloseIcon className="h-4 w-4" />
         </button>
 
+        <div
+          className="sticky top-0 z-20 flex touch-none items-center justify-center bg-surface py-3 sm:hidden"
+          aria-label="Drag down to close"
+          onPointerDown={onHandlePointerDown}
+          onPointerMove={onHandlePointerMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onLostPointerCapture={endDrag}
+        >
+          <div
+            className={`h-1.5 w-12 rounded-full transition-colors ${
+              dragging ? "bg-white/55" : "bg-white/30"
+            }`}
+            aria-hidden
+          />
+        </div>
+
         <div className="flex flex-col sm:flex-row sm:items-start">
-          <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-background sm:w-[min(20rem,46%)]">
-            {cover ? (
-              <Image
-                src={cover}
-                alt={`${album.artist} - ${album.title}`}
-                fill
-                sizes={MODAL_IMAGE_SIZES}
-                className="object-cover"
-                quality={90}
-                placeholder={COVER_PLACEHOLDER}
-                loading="eager"
-                fetchPriority="high"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-sm text-muted">
-                No cover
-              </div>
-            )}
+          <div
+            className={`cursor-grab select-none sm:w-[min(20rem,46%)] sm:cursor-default sm:touch-auto sm:select-auto sm:shrink-0 sm:active:cursor-default ${
+              dragging ? "touch-none active:cursor-grabbing" : "touch-pan-y"
+            }`}
+            onPointerDown={onCoverPointerDown}
+            onPointerMove={onCoverPointerMove}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+            onLostPointerCapture={endDrag}
+          >
+            <div className="relative aspect-square w-full overflow-hidden bg-background">
+              {cover ? (
+                <Image
+                  src={cover}
+                  alt={`${album.artist} - ${album.title}`}
+                  fill
+                  sizes={MODAL_IMAGE_SIZES}
+                  className="pointer-events-none object-cover"
+                  quality={90}
+                  placeholder={COVER_PLACEHOLDER}
+                  loading="eager"
+                  fetchPriority="high"
+                  draggable={false}
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-muted">
+                  No cover
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-1 flex-col justify-center gap-5 p-6 sm:p-7">
