@@ -41,10 +41,11 @@ Open [http://localhost:3000](http://localhost:3000).
    - `DISCOGS_USER_TOKEN`
    - `DISCOGS_USERNAME`
    - `SITE_TITLE` (optional)
+   - `SITE_URL` (optional, defaults to `https://vinyl.johnberger.dev`)
 4. Deploy
 
 Keep the Discogs token server-only. Do not prefix it with `NEXT_PUBLIC_`.
 
 The site is excluded from search indexing and AI scrapers that honor robots rules (`noindex`, `robots.txt`, and `X-Robots-Tag`). There is no sitemap.
 
-The collection is fetched from Discogs on the server and cached for one hour, so browsing the site does not hit the Discogs API on every page load.
+The collection is fetched from Discogs on the server and cached for 24 hours, so browsing the site does not hit the Discogs API on every page load.

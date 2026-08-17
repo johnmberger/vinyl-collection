@@ -2,18 +2,12 @@ import type { Metadata } from "next";
 import Collection from "@/components/Collection";
 import SetupNotice from "@/components/SetupNotice";
 import { getCollection, getDiscogsConfig } from "@/lib/discogs";
-import { getSiteTitle, NO_INDEX_ROBOTS } from "@/lib/site";
+import { getSiteMetadata, getSiteTitle } from "@/lib/site";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = getSiteTitle();
-
-  return {
-    title,
-    description: "A personal vinyl record collection",
-    robots: NO_INDEX_ROBOTS,
-  };
+  return getSiteMetadata();
 }
 
 export default async function Home() {

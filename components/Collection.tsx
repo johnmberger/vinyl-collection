@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import AlbumCard from "@/components/AlbumCard";
 import AlbumModal from "@/components/AlbumModal";
+import { SearchIcon } from "@/components/icons";
 import { filterAndSortAlbums, type SortOption } from "@/lib/albums";
 import { ABOVE_FOLD_COUNT } from "@/lib/images";
 import type { Album } from "@/lib/discogs";
@@ -42,12 +43,13 @@ export default function Collection({
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
+              <SearchIcon className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted" />
               <input
                 type="search"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search artist, album, label, or year"
-                className="w-full cursor-text rounded-lg border border-white/10 bg-surface px-4 py-2.5 text-sm text-cream outline-none transition-colors placeholder:text-muted focus:border-accent/60"
+                className="w-full cursor-text rounded-xl border border-white/10 bg-surface py-2.5 pr-4 pl-10 text-sm text-cream outline-none transition-colors placeholder:text-muted focus:border-accent/60"
               />
             </div>
             <select
@@ -55,7 +57,7 @@ export default function Collection({
               onChange={(event) =>
                 setSortBy(event.target.value as SortOption)
               }
-              className="cursor-pointer rounded-lg border border-white/10 bg-surface px-4 py-2.5 text-sm text-cream outline-none transition-colors focus:border-accent/60"
+              className="cursor-pointer rounded-xl border border-white/10 bg-surface px-4 py-2.5 text-sm text-cream outline-none transition-colors focus:border-accent/60"
             >
               <option value="title-asc">Album A–Z</option>
               <option value="artist-asc">Artist A–Z</option>
@@ -79,6 +81,7 @@ export default function Collection({
               <AlbumCard
                 key={album.id}
                 album={album}
+                collection={albums}
                 priority={index < ABOVE_FOLD_COUNT}
                 onSelect={setSelectedAlbum}
               />
@@ -104,6 +107,8 @@ export default function Collection({
       {selectedAlbum ? (
         <AlbumModal
           album={selectedAlbum}
+          collection={albums}
+          onSelect={setSelectedAlbum}
           onClose={() => setSelectedAlbum(null)}
         />
       ) : null}

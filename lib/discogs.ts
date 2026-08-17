@@ -1,6 +1,6 @@
 const DISCOGS_API = "https://api.discogs.com";
 const USER_AGENT = "VinylCollection/1.0";
-export const COLLECTION_REVALIDATE_SECONDS = 3600;
+export const COLLECTION_REVALIDATE_SECONDS = 86400;
 
 export type Album = {
   id: number;
@@ -11,6 +11,8 @@ export type Album = {
   coverUrl: string | null;
   thumbUrl: string | null;
   format: string;
+  formatName: string;
+  formatDescriptions: string[];
   label: string;
   catno: string;
   dateAdded: string | null;
@@ -81,6 +83,8 @@ function toAlbum(release: DiscogsCollectionRelease): Album | null {
     format: format
       ? [format.name, ...(format.descriptions ?? [])].join(" · ")
       : "",
+    formatName: format?.name ?? "",
+    formatDescriptions: format?.descriptions ?? [],
     label: label?.name ?? "",
     catno: label?.catno ?? "",
     dateAdded: release.date_added ?? null,
@@ -104,7 +108,11 @@ async function fetchCollectionPage(
       Authorization: `Discogs token=${token}`,
       "User-Agent": USER_AGENT,
     },
-    next: { revalidate: COLLECTION_REVALIDATE_SECONDS },
+    cache: "force-cache",
+    next: {
+      revalidate: COLLECTION_REVALIDATE_SECONDS,
+      tags: ["discogs-collection"],
+    },
   });
 
   if (!response.ok) {

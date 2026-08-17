@@ -10,7 +10,7 @@ export default function Loading() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {Array.from({ length: 12 }).map((_, index) => (
             <div key={index} className="space-y-2">
-              <div className="aspect-square animate-pulse bg-surface" />
+              <div className="aspect-square animate-pulse rounded-xl bg-surface" />
               <div className="h-4 w-3/4 animate-pulse rounded bg-surface" />
               <div className="h-3 w-1/2 animate-pulse rounded bg-surface" />
             </div>
