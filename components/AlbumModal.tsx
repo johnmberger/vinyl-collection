@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type TransitionEvent as ReactTransitionEvent,
+} from "react";
 import Image from "next/image";
 import Chip from "@/components/Chip";
 import {
@@ -34,11 +41,77 @@ export default function AlbumModal({
   onClose,
 }: AlbumModalProps) {
   const [closing, setClosing] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [settling, setSettling] = useState(false);
+  const [entered, setEntered] = useState(false);
+  const drag = useRef({
+    active: false,
+    startY: 0,
+    lastY: 0,
+    lastT: 0,
+    y: 0,
+    velocity: 0,
+  });
+
+  const isMobileSheet = () =>
+    window.matchMedia("(max-width: 639px)").matches;
 
   const requestClose = useCallback(() => {
     if (closing) return;
     setClosing(true);
+    setDragging(false);
+    setDragOffset((current) => {
+      if (current <= 0) return current;
+      return Math.max(current, window.innerHeight);
+    });
   }, [closing]);
+
+  const onHandlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (closing || !isMobileSheet()) return;
+    drag.current = {
+      active: true,
+      startY: event.clientY,
+      lastY: event.clientY,
+      lastT: performance.now(),
+      y: 0,
+      velocity: 0,
+    };
+    setSettling(false);
+    setEntered(true);
+    setDragging(true);
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const onHandlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!drag.current.active) return;
+    const next = Math.max(0, event.clientY - drag.current.startY);
+    const now = performance.now();
+    const elapsed = now - drag.current.lastT;
+    if (elapsed > 0) {
+      drag.current.velocity = (event.clientY - drag.current.lastY) / elapsed;
+    }
+    drag.current.lastY = event.clientY;
+    drag.current.lastT = now;
+    drag.current.y = next;
+    setDragOffset(next);
+  };
+
+  const onHandlePointerUp = () => {
+    if (!drag.current.active) return;
+    drag.current.active = false;
+    setDragging(false);
+
+    const shouldClose = drag.current.velocity > 0.45 || drag.current.y > 110;
+    if (shouldClose) {
+      requestClose();
+      return;
+    }
+
+    setSettling(true);
+    setDragOffset(0);
+  };
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -61,38 +134,91 @@ export default function AlbumModal({
   const tags = editionTags(album);
   const format = formatSummary(album);
 
+  const dragProgress = Math.min(dragOffset / 360, 1);
+  const usingDragMotion = dragging || dragOffset > 0 || settling;
+
   return (
-    <div
-      className={`fixed inset-0 z-50 flex cursor-pointer items-end justify-center bg-black/70 p-0 backdrop-blur-[2px] sm:items-center sm:p-6 ${
-        closing ? "animate-backdrop-out" : "animate-backdrop-in"
-      }`}
-      onClick={requestClose}
-    >
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6">
+      <div
+        className={`absolute inset-0 cursor-pointer bg-black/70 backdrop-blur-[2px] ${
+          usingDragMotion
+            ? ""
+            : closing
+              ? "animate-backdrop-out"
+              : "animate-backdrop-in"
+        }`}
+        style={
+          usingDragMotion
+            ? {
+                opacity: Math.max(0, 1 - dragProgress * 0.85),
+                transition: dragging
+                  ? "none"
+                  : "opacity 320ms cubic-bezier(0.32, 0.72, 0, 1)",
+              }
+            : undefined
+        }
+        onClick={requestClose}
+      />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="album-modal-title"
-        className={`relative max-h-[92vh] w-full max-w-xl cursor-default overflow-y-auto rounded-t-2xl bg-surface shadow-2xl sm:max-w-2xl sm:rounded-2xl ${
-          closing
-            ? "animate-sheet-out sm:animate-modal-out"
-            : "animate-sheet-in sm:animate-modal-in"
+        className={`relative z-10 max-h-[92vh] w-full max-w-xl cursor-default overflow-y-auto rounded-t-2xl bg-surface shadow-2xl sm:max-w-2xl sm:rounded-2xl ${
+          usingDragMotion
+            ? ""
+            : closing
+              ? "animate-sheet-out sm:animate-modal-out"
+              : entered
+                ? ""
+                : "animate-sheet-in sm:animate-modal-in"
         }`}
+        style={{
+          transform: usingDragMotion ? `translateY(${dragOffset}px)` : undefined,
+          transition: dragging
+            ? "none"
+            : usingDragMotion
+              ? "transform 320ms cubic-bezier(0.32, 0.72, 0, 1)"
+              : undefined,
+          willChange: usingDragMotion ? "transform" : undefined,
+        }}
         onClick={(event) => event.stopPropagation()}
         onAnimationEnd={(event) => {
-          if (event.target !== event.currentTarget || !closing) return;
-          onClose();
+          if (event.target !== event.currentTarget) return;
+          if (closing) {
+            onClose();
+            return;
+          }
+          setEntered(true);
+        }}
+        onTransitionEnd={(event: ReactTransitionEvent<HTMLDivElement>) => {
+          if (
+            event.target !== event.currentTarget ||
+            event.propertyName !== "transform"
+          ) {
+            return;
+          }
+          if (closing) {
+            onClose();
+            return;
+          }
+          setSettling(false);
         }}
       >
-        <div className="relative flex items-center justify-center px-4 py-3 sm:hidden">
-          <div className="h-1 w-10 rounded-full bg-white/20" aria-hidden />
-          <button
-            type="button"
-            onClick={requestClose}
-            className="absolute right-2 rounded-full p-2 text-cream/80 transition-colors hover:bg-white/10 hover:text-cream"
-            aria-label="Close album details"
-          >
-            <CloseIcon className="h-4 w-4" />
-          </button>
+        <div
+          className="flex cursor-grab touch-none items-center justify-center py-3 sm:hidden active:cursor-grabbing"
+          aria-label="Drag down to close"
+          onPointerDown={onHandlePointerDown}
+          onPointerMove={onHandlePointerMove}
+          onPointerUp={onHandlePointerUp}
+          onPointerCancel={onHandlePointerUp}
+          onLostPointerCapture={onHandlePointerUp}
+        >
+          <div
+            className={`h-1.5 w-12 rounded-full transition-colors ${
+              dragging ? "bg-white/55" : "bg-white/30"
+            }`}
+            aria-hidden
+          />
         </div>
 
         <button
