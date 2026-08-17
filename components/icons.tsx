@@ -76,6 +76,25 @@ export function HashIcon(props: IconProps) {
   );
 }
 
+export function SortIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M5 6L8 3L11 6" />
+      <path d="M8 3v4" />
+      <path d="M11 10L8 13L5 10" />
+      <path d="M8 13v-4" />
+    </Icon>
+  );
+}
+
+export function ChevronDownIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 6.5L8 10.5L12 6.5" />
+    </Icon>
+  );
+}
+
 export function ExternalIcon(props: IconProps) {
   return (
     <Icon {...props}>

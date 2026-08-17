@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AlbumCard from "@/components/AlbumCard";
 import AlbumModal from "@/components/AlbumModal";
-import { SearchIcon } from "@/components/icons";
+import { ChevronDownIcon, SearchIcon, SortIcon } from "@/components/icons";
 import { filterAndSortAlbums, type SortOption } from "@/lib/albums";
 import { ABOVE_FOLD_COUNT } from "@/lib/images";
 import type { Album } from "@/lib/discogs";
@@ -14,6 +14,48 @@ type CollectionProps = {
   username: string;
 };
 
+function useHideOnScroll(disabled: boolean) {
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    if (disabled) {
+      setHidden(false);
+      return;
+    }
+
+    let lastY = window.scrollY;
+    let frame = 0;
+
+    const onScroll = () => {
+      if (frame) return;
+
+      frame = window.requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const delta = y - lastY;
+
+        if (y < 64) {
+          setHidden(false);
+        } else if (delta > 8) {
+          setHidden(true);
+        } else if (delta < -8) {
+          setHidden(false);
+        }
+
+        lastY = y;
+        frame = 0;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.cancelAnimationFrame(frame);
+    };
+  }, [disabled]);
+
+  return hidden;
+}
+
 export default function Collection({
   albums,
   title,
@@ -22,6 +64,8 @@ export default function Collection({
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("title-asc");
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const toolbarHidden = useHideOnScroll(searchFocused);
 
   const visibleAlbums = useMemo(
     () => filterAndSortAlbums(albums, searchQuery, sortBy),
@@ -30,47 +74,60 @@ export default function Collection({
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-20 border-b border-white/5 bg-background/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between gap-4">
-            <h1 className="font-display text-4xl tracking-tight text-cream sm:text-5xl">
-              {title}
-            </h1>
-            <p className="pb-1 text-sm text-muted">
-              {albums.length} record{albums.length === 1 ? "" : "s"}
-            </p>
-          </div>
+      <header className="mx-auto max-w-7xl px-4 pt-6 pb-4 sm:px-6 sm:pt-8 lg:px-8">
+        <div>
+          <h1 className="font-display text-4xl tracking-tight text-cream sm:text-5xl">
+            {title}
+          </h1>
+          <p className="mt-2 text-sm text-muted">
+            {albums.length} record{albums.length === 1 ? "" : "s"}
+          </p>
+        </div>
+      </header>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="relative flex-1">
+      <div
+        className={`sticky top-0 z-20 overflow-hidden bg-background/90 backdrop-blur-md transition-[max-height] duration-200 ease-out md:max-h-24 ${
+          toolbarHidden ? "max-h-0" : "max-h-44 sm:max-h-24"
+        }`}
+      >
+        <div className="border-b border-white/5">
+          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 sm:flex-row sm:gap-3 sm:px-6 lg:px-8">
+            <div className="relative min-w-0 flex-1">
               <SearchIcon className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted" />
               <input
                 type="search"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search artist, album, label, or year"
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
+                placeholder="Search collection"
                 className="w-full cursor-text rounded-xl border border-white/10 bg-surface py-2.5 pr-4 pl-10 text-sm text-cream outline-none transition-colors placeholder:text-muted focus:border-accent/60"
               />
             </div>
-            <select
-              value={sortBy}
-              onChange={(event) =>
-                setSortBy(event.target.value as SortOption)
-              }
-              className="cursor-pointer rounded-xl border border-white/10 bg-surface px-4 py-2.5 text-sm text-cream outline-none transition-colors focus:border-accent/60"
-            >
-              <option value="title-asc">Album A–Z</option>
-              <option value="artist-asc">Artist A–Z</option>
-              <option value="artist-desc">Artist Z–A</option>
-              <option value="year-desc">Year (newest)</option>
-              <option value="year-asc">Year (oldest)</option>
-              <option value="added-desc">Recently added</option>
-            </select>
+            <div className="relative w-full sm:w-auto">
+              <SortIcon className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted" />
+              <select
+                value={sortBy}
+                onChange={(event) =>
+                  setSortBy(event.target.value as SortOption)
+                }
+                aria-label="Sort collection"
+                className="w-full cursor-pointer appearance-none rounded-xl border border-white/10 bg-surface py-2.5 pr-10 pl-10 text-sm text-cream outline-none transition-colors focus:border-accent/60 sm:w-auto sm:pr-10"
+              >
+                <option value="title-asc">Album A–Z</option>
+                <option value="artist-asc">Artist A–Z</option>
+                <option value="artist-desc">Artist Z–A</option>
+                <option value="year-desc">Year (newest)</option>
+                <option value="year-asc">Year (oldest)</option>
+                <option value="added-desc">Recently added</option>
+              </select>
+              <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted" />
+            </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 pt-4 pb-8 sm:px-6 lg:px-8">
         {visibleAlbums.length === 0 ? (
           <p className="py-20 text-center text-muted">
             No records match that search.

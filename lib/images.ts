@@ -3,7 +3,7 @@ import { getImageProps } from "next/image";
 export const GRID_IMAGE_SIZES =
   "(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 256px";
 
-export const MODAL_IMAGE_SIZES = "(max-width: 640px) 100vw, 256px";
+export const MODAL_IMAGE_SIZES = "(max-width: 640px) 100vw, 320px";
 
 export const ABOVE_FOLD_COUNT = 6;
 

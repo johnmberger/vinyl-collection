@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Chip from "@/components/Chip";
 import {
@@ -33,9 +33,16 @@ export default function AlbumModal({
   onSelect,
   onClose,
 }: AlbumModalProps) {
+  const [closing, setClosing] = useState(false);
+
+  const requestClose = useCallback(() => {
+    if (closing) return;
+    setClosing(true);
+  }, [closing]);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") requestClose();
     };
 
     document.body.style.overflow = "hidden";
@@ -45,7 +52,7 @@ export default function AlbumModal({
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [onClose]);
+  }, [requestClose]);
 
   const cover = album.coverUrl || album.thumbUrl;
   const discogsUrl = `https://www.discogs.com/release/${album.releaseId}`;
@@ -56,27 +63,49 @@ export default function AlbumModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex cursor-pointer items-end justify-center bg-black/70 p-0 backdrop-blur-[2px] animate-backdrop-in sm:items-center sm:p-6"
-      onClick={onClose}
+      className={`fixed inset-0 z-50 flex cursor-pointer items-end justify-center bg-black/70 p-0 backdrop-blur-[2px] sm:items-center sm:p-6 ${
+        closing ? "animate-backdrop-out" : "animate-backdrop-in"
+      }`}
+      onClick={requestClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="album-modal-title"
-        className="relative w-full max-w-xl cursor-default overflow-hidden rounded-t-2xl bg-surface shadow-2xl animate-modal-in sm:max-w-2xl sm:rounded-2xl"
+        className={`relative max-h-[92vh] w-full max-w-xl cursor-default overflow-y-auto rounded-t-2xl bg-surface shadow-2xl sm:max-w-2xl sm:rounded-2xl ${
+          closing
+            ? "animate-sheet-out sm:animate-modal-out"
+            : "animate-sheet-in sm:animate-modal-in"
+        }`}
         onClick={(event) => event.stopPropagation()}
+        onAnimationEnd={(event) => {
+          if (event.target !== event.currentTarget || !closing) return;
+          onClose();
+        }}
       >
+        <div className="relative flex items-center justify-center px-4 py-3 sm:hidden">
+          <div className="h-1 w-10 rounded-full bg-white/20" aria-hidden />
+          <button
+            type="button"
+            onClick={requestClose}
+            className="absolute right-2 rounded-full p-2 text-cream/80 transition-colors hover:bg-white/10 hover:text-cream"
+            aria-label="Close album details"
+          >
+            <CloseIcon className="h-4 w-4" />
+          </button>
+        </div>
+
         <button
           type="button"
-          onClick={onClose}
-          className="absolute top-3 right-3 z-10 rounded-full p-2 text-muted transition-colors hover:bg-white/10 hover:text-cream"
+          onClick={requestClose}
+          className="absolute top-3 right-3 z-10 hidden rounded-full p-2 text-muted transition-colors hover:bg-white/10 hover:text-cream sm:block"
           aria-label="Close album details"
         >
           <CloseIcon className="h-4 w-4" />
         </button>
 
-        <div className="flex flex-col sm:flex-row">
-          <div className="relative aspect-square w-full bg-background sm:w-64 sm:shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-start">
+          <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-background sm:w-[min(20rem,46%)]">
             {cover ? (
               <Image
                 src={cover}
