@@ -192,7 +192,7 @@ export default function AlbumModal({
   const usingDragMotion = dragging || dragOffset > 0 || settling;
 
   return (
-    <div className="fixed inset-x-0 top-0 z-50 flex h-lvh items-end justify-center sm:inset-0 sm:h-auto sm:items-center sm:p-6">
+    <div className="fixed inset-x-0 top-0 z-50 flex h-lvh flex-col pt-[calc(env(safe-area-inset-top,0px)+2.75rem)] sm:inset-0 sm:h-auto sm:items-center sm:justify-center sm:p-6">
       <div
         className={`absolute inset-0 cursor-pointer bg-black/70 backdrop-blur-[2px] ${
           usingDragMotion
@@ -217,7 +217,7 @@ export default function AlbumModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="album-modal-title"
-        className={`relative z-10 flex h-[calc(100lvh-0.75rem)] max-h-[calc(100lvh-0.75rem)] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl bg-surface shadow-2xl sm:h-auto sm:max-h-[92vh] sm:max-w-2xl sm:overflow-y-auto sm:rounded-2xl ${
+        className={`relative z-10 flex min-h-0 w-full max-w-xl flex-1 flex-col overflow-hidden rounded-t-2xl bg-surface shadow-2xl sm:h-auto sm:max-h-[92vh] sm:max-w-2xl sm:flex-none sm:overflow-y-auto sm:rounded-2xl ${
           usingDragMotion
             ? ""
             : closing
