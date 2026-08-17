@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Geist } from "next/font/google";
+import { NO_INDEX_ROBOTS } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,9 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Vinyl Collection",
+  title: "John's Vinyl Collection",
   description: "A personal vinyl record collection",
+  robots: NO_INDEX_ROBOTS,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

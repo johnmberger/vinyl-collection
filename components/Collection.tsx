@@ -32,14 +32,9 @@ export default function Collection({
       <header className="sticky top-0 z-20 border-b border-white/5 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="text-xs tracking-[0.25em] text-accent uppercase">
-                Discogs
-              </p>
-              <h1 className="mt-1 font-display text-4xl tracking-tight text-cream sm:text-5xl">
-                {title}
-              </h1>
-            </div>
+            <h1 className="font-display text-4xl tracking-tight text-cream sm:text-5xl">
+              {title}
+            </h1>
             <p className="pb-1 text-sm text-muted">
               {albums.length} record{albums.length === 1 ? "" : "s"}
             </p>
@@ -52,7 +47,7 @@ export default function Collection({
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search artist, album, label, or year"
-                className="w-full rounded-lg border border-white/10 bg-surface px-4 py-2.5 text-sm text-cream outline-none transition-colors placeholder:text-muted focus:border-accent/60"
+                className="w-full cursor-text rounded-lg border border-white/10 bg-surface px-4 py-2.5 text-sm text-cream outline-none transition-colors placeholder:text-muted focus:border-accent/60"
               />
             </div>
             <select
@@ -60,7 +55,7 @@ export default function Collection({
               onChange={(event) =>
                 setSortBy(event.target.value as SortOption)
               }
-              className="rounded-lg border border-white/10 bg-surface px-4 py-2.5 text-sm text-cream outline-none transition-colors focus:border-accent/60"
+              className="cursor-pointer rounded-lg border border-white/10 bg-surface px-4 py-2.5 text-sm text-cream outline-none transition-colors focus:border-accent/60"
             >
               <option value="title-asc">Album A–Z</option>
               <option value="artist-asc">Artist A–Z</option>
@@ -99,7 +94,7 @@ export default function Collection({
             href={`https://www.discogs.com/user/${username}/collection`}
             target="_blank"
             rel="noreferrer"
-            className="text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent"
+            className="text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent cursor-pointer"
           >
             Discogs
           </a>

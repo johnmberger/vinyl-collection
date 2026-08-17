@@ -30,14 +30,14 @@ export default function AlbumModal({ album, onClose }: AlbumModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 sm:items-center sm:p-6"
+      className="fixed inset-0 z-50 flex cursor-pointer items-end justify-center bg-black/70 p-0 sm:items-center sm:p-6"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="album-modal-title"
-        className="max-h-[92vh] w-full max-w-3xl overflow-y-auto bg-surface shadow-2xl sm:max-h-[85vh]"
+        className="max-h-[92vh] w-full max-w-3xl cursor-default overflow-y-auto bg-surface shadow-2xl sm:max-h-[85vh]"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="grid sm:grid-cols-2">
@@ -65,7 +65,7 @@ export default function AlbumModal({ album, onClose }: AlbumModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="mb-6 self-end text-sm text-muted transition-colors hover:text-cream"
+              className="mb-6 cursor-pointer self-end text-sm text-muted transition-colors hover:text-cream"
               aria-label="Close album details"
             >
               Close
@@ -112,7 +112,7 @@ export default function AlbumModal({ album, onClose }: AlbumModalProps) {
               href={discogsUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-auto pt-8 text-sm text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
+              className="mt-auto cursor-pointer pt-8 text-sm text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
             >
               View on Discogs
             </a>

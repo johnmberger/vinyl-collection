@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { NO_INDEX_ROBOTS } from "./lib/site";
 
 const nextConfig: NextConfig = {
   images: {
@@ -24,6 +25,17 @@ const nextConfig: NextConfig = {
     qualities: [75, 90],
     imageSizes: [192, 256, 384, 512],
     deviceSizes: [640, 750, 828, 1080, 1200],
+  },
+  async headers() {
+    const robotsHeader = {
+      key: "X-Robots-Tag",
+      value: NO_INDEX_ROBOTS,
+    };
+
+    return [
+      { source: "/", headers: [robotsHeader] },
+      { source: "/:path*", headers: [robotsHeader] },
+    ];
   },
 };
 

@@ -2,7 +2,9 @@ export default function SetupNotice() {
   return (
     <div className="flex min-h-screen items-center justify-center px-6">
       <div className="max-w-lg">
-        <h1 className="font-display text-4xl text-cream">Vinyl Collection</h1>
+        <h1 className="font-display text-4xl text-cream">
+          John&apos;s Vinyl Collection
+        </h1>
         <p className="mt-4 text-muted">
           Add your Discogs credentials to load the collection.
         </p>
@@ -21,7 +23,7 @@ export default function SetupNotice() {
           Get a personal access token at{" "}
           <a
             href="https://www.discogs.com/settings/developers"
-            className="text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
+            className="cursor-pointer text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
             target="_blank"
             rel="noreferrer"
           >

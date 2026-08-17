@@ -30,7 +30,7 @@ export default function AlbumCard({
           prefetchCover(album.coverUrl);
         }
       }}
-      className="group text-left"
+      className="group cursor-pointer text-left"
     >
       <div className="relative aspect-square overflow-hidden bg-surface shadow-lg ring-1 ring-white/5 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
         {image ? (
