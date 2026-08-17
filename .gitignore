@@ -22,7 +22,11 @@
 
 # misc
 .DS_Store
+Thumbs.db
 *.pem
+*.swp
+*.swo
+.idea
 
 # debug
 npm-debug.log*
@@ -30,8 +34,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env / secrets — commit the example only
+.env
+.env.*
+!.env.example
+
+# local HTTPS certs (next dev --experimental-https)
+/certificates
 
 # vercel
 .vercel
