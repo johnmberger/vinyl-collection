@@ -8,10 +8,9 @@ export const MODAL_IMAGE_SIZES = "(max-width: 640px) 100vw, 384px";
 export const ABOVE_FOLD_COUNT = 6;
 
 export const COVER_PLACEHOLDER =
-  "data:image/svg+xml;charset=utf-8," +
-  encodeURIComponent(
+  `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><rect width="100%" height="100%" fill="#1a1714"/></svg>'
-  );
+  )}` as `data:image/${string}`;
 
 const prefetchedCovers = new Set<string>();
 
