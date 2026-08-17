@@ -15,6 +15,10 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = getSiteMetadata();
 
+export const viewport = {
+  viewportFit: "cover" as const,
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html

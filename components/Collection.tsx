@@ -23,26 +23,63 @@ function useHideOnScroll(disabled: boolean) {
       return;
     }
 
-    let lastY = window.scrollY;
+    const topReveal = 48;
+    const threshold = 14;
+    const lockMs = 280;
+    const ignoreJump = 100;
+
+    let lastY = Math.max(0, window.scrollY);
+    let accumulated = 0;
+    let lockedUntil = 0;
+    let isHidden = false;
     let frame = 0;
 
     const onScroll = () => {
       if (frame) return;
 
       frame = window.requestAnimationFrame(() => {
-        const y = window.scrollY;
+        frame = 0;
+        const now = performance.now();
+        const y = Math.max(0, window.scrollY);
         const delta = y - lastY;
+        lastY = y;
 
-        if (y < 64) {
-          setHidden(false);
-        } else if (delta > 8) {
-          setHidden(true);
-        } else if (delta < -8) {
-          setHidden(false);
+        if (now < lockedUntil) {
+          accumulated = 0;
+          return;
         }
 
-        lastY = y;
-        frame = 0;
+        if (y <= topReveal) {
+          accumulated = 0;
+          if (isHidden) {
+            isHidden = false;
+            lockedUntil = now + lockMs;
+            setHidden(false);
+          }
+          return;
+        }
+
+        if (Math.abs(delta) > ignoreJump) {
+          accumulated = 0;
+          return;
+        }
+
+        if ((accumulated > 0 && delta < 0) || (accumulated < 0 && delta > 0)) {
+          accumulated = 0;
+        }
+        accumulated += delta;
+
+        if (accumulated > threshold && !isHidden) {
+          isHidden = true;
+          accumulated = 0;
+          lockedUntil = now + lockMs;
+          setHidden(true);
+        } else if (accumulated < -threshold && isHidden) {
+          isHidden = false;
+          accumulated = 0;
+          lockedUntil = now + lockMs;
+          setHidden(false);
+        }
       });
     };
 
@@ -65,7 +102,9 @@ export default function Collection({
   const [sortBy, setSortBy] = useState<SortOption>("title-asc");
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [searchFocused, setSearchFocused] = useState(false);
-  const toolbarHidden = useHideOnScroll(searchFocused);
+  const toolbarHidden = useHideOnScroll(
+    searchFocused || selectedAlbum !== null,
+  );
 
   const visibleAlbums = useMemo(
     () => filterAndSortAlbums(albums, searchQuery, sortBy),
@@ -86,8 +125,10 @@ export default function Collection({
       </header>
 
       <div
-        className={`sticky top-0 z-20 overflow-hidden bg-background/90 backdrop-blur-md transition-[max-height] duration-200 ease-out md:max-h-24 ${
-          toolbarHidden ? "max-h-0" : "max-h-44 sm:max-h-24"
+        className={`sticky top-0 z-20 overflow-hidden bg-background/95 backdrop-blur-md transition-[max-height] duration-200 ease-out [transform:translateZ(0)] md:max-h-24 md:pointer-events-auto ${
+          toolbarHidden
+            ? "pointer-events-none max-h-0"
+            : "max-h-44 sm:max-h-24"
         }`}
       >
         <div className="border-b border-white/5">

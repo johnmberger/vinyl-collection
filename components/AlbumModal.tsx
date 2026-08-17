@@ -192,7 +192,7 @@ export default function AlbumModal({
   const usingDragMotion = dragging || dragOffset > 0 || settling;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6">
+    <div className="fixed inset-x-0 top-0 z-50 flex h-lvh items-end justify-center sm:inset-0 sm:h-auto sm:items-center sm:p-6">
       <div
         className={`absolute inset-0 cursor-pointer bg-black/70 backdrop-blur-[2px] ${
           usingDragMotion
@@ -214,11 +214,10 @@ export default function AlbumModal({
         onClick={requestClose}
       />
       <div
-        ref={sheetRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="album-modal-title"
-        className={`relative z-10 max-h-[92vh] w-full max-w-xl cursor-default overflow-y-auto overscroll-y-contain rounded-t-2xl bg-surface shadow-2xl sm:max-w-2xl sm:rounded-2xl ${
+        className={`relative z-10 flex h-[calc(100lvh-0.75rem)] max-h-[calc(100lvh-0.75rem)] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl bg-surface shadow-2xl sm:h-auto sm:max-h-[92vh] sm:max-w-2xl sm:overflow-y-auto sm:rounded-2xl ${
           usingDragMotion
             ? ""
             : closing
@@ -269,7 +268,7 @@ export default function AlbumModal({
         </button>
 
         <div
-          className="sticky top-0 z-20 flex touch-none items-center justify-center bg-surface py-3 sm:hidden"
+          className="flex shrink-0 touch-none items-center justify-center bg-surface py-3 sm:hidden"
           aria-label="Drag down to close"
           onPointerDown={onHandlePointerDown}
           onPointerMove={onHandlePointerMove}
@@ -285,6 +284,10 @@ export default function AlbumModal({
           />
         </div>
 
+        <div
+          ref={sheetRef}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain sm:min-h-min sm:flex-none sm:overflow-visible"
+        >
         <div className="flex flex-col sm:flex-row sm:items-start">
           <div
             className={`cursor-grab select-none sm:w-[min(20rem,46%)] sm:cursor-default sm:touch-auto sm:select-auto sm:shrink-0 sm:active:cursor-default ${
@@ -318,7 +321,7 @@ export default function AlbumModal({
             </div>
           </div>
 
-          <div className="flex flex-1 flex-col justify-center gap-5 p-6 sm:p-7">
+          <div className="flex flex-1 flex-col justify-center gap-5 p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+100lvh-100svh))] sm:p-7">
             <div className="pr-8">
               <p className="text-sm tracking-wide text-accent uppercase">
                 {album.artist}
@@ -409,6 +412,7 @@ export default function AlbumModal({
               <ExternalIcon />
             </a>
           </div>
+        </div>
         </div>
       </div>
     </div>
