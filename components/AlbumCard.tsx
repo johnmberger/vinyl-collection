@@ -38,7 +38,7 @@ export default function AlbumCard({
       }}
       className="group cursor-pointer text-left"
     >
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-surface shadow-lg ring-1 ring-white/5 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-surface shadow-lg ring-1 ring-white/5 transition duration-300 ease-out group-hover:-translate-y-0.5 group-hover:shadow-xl group-hover:ring-white/20">
         {image ? (
           <Image
             src={image}
@@ -49,7 +49,7 @@ export default function AlbumCard({
             placeholder={COVER_PLACEHOLDER}
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : "auto"}
-            className="object-cover backface-hidden transition-transform duration-500 group-hover:scale-[1.04]"
+            className="object-cover"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-xs text-muted">

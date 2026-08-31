@@ -261,7 +261,7 @@ export default function AlbumModal({
         <button
           type="button"
           onClick={requestClose}
-          className="absolute top-3 right-3 z-10 hidden rounded-full p-2 text-muted transition-colors hover:bg-white/10 hover:text-cream sm:block"
+          className="absolute top-3 right-3 z-10 hidden cursor-pointer rounded-full p-2 text-muted transition-colors hover:bg-white/10 hover:text-cream sm:block"
           aria-label="Close album details"
         >
           <CloseIcon className="h-4 w-4" />
@@ -406,7 +406,7 @@ export default function AlbumModal({
               href={discogsUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:decoration-accent"
+              className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:decoration-accent"
             >
               View on Discogs
               <ExternalIcon />

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import AlbumCard from "@/components/AlbumCard";
 import AlbumModal from "@/components/AlbumModal";
-import { ChevronDownIcon, SearchIcon, SortIcon } from "@/components/icons";
+import { ChevronDownIcon, CloseIcon, SearchIcon, SortIcon } from "@/components/icons";
 import { filterAndSortAlbums, type SortOption } from "@/lib/albums";
 import { ABOVE_FOLD_COUNT } from "@/lib/images";
 import type { Album } from "@/lib/discogs";
@@ -142,8 +142,19 @@ export default function Collection({
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
                 placeholder="Search collection"
-                className="w-full cursor-text rounded-xl border border-white/10 bg-surface py-2.5 pr-4 pl-10 text-sm text-cream outline-none transition-colors placeholder:text-muted focus:border-accent/60"
+                className="w-full cursor-text rounded-xl border border-white/10 bg-surface py-2.5 pr-10 pl-10 text-sm text-cream outline-none transition-colors placeholder:text-muted focus:border-accent/60 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
               />
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => setSearchQuery("")}
+                  className="absolute top-1/2 right-1.5 -translate-y-1/2 rounded-full p-1.5 text-muted transition-colors hover:bg-white/10 hover:text-cream"
+                  aria-label="Clear search"
+                >
+                  <CloseIcon className="h-3.5 w-3.5" />
+                </button>
+              ) : null}
             </div>
             <div className="relative w-full sm:w-auto">
               <SortIcon className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted" />

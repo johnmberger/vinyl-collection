@@ -21,7 +21,7 @@ export default function Chip({
 
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} className={className}>
+      <button type="button" onClick={onClick} className={`${className} cursor-pointer`}>
         {children}
       </button>
     );
