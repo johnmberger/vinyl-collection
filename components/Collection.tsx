@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import AlbumCard from "@/components/AlbumCard";
 import AlbumModal from "@/components/AlbumModal";
 import { ChevronDownIcon, CloseIcon, SearchIcon, SortIcon } from "@/components/icons";
+import { useHideOnScroll } from "@/hooks/useHideOnScroll";
 import { filterAndSortAlbums, type SortOption } from "@/lib/albums";
 import { ABOVE_FOLD_COUNT } from "@/lib/images";
 import type { Album } from "@/lib/discogs";
@@ -13,85 +14,6 @@ type CollectionProps = {
   title: string;
   username: string;
 };
-
-function useHideOnScroll(disabled: boolean) {
-  const [hidden, setHidden] = useState(false);
-
-  useEffect(() => {
-    if (disabled) {
-      setHidden(false);
-      return;
-    }
-
-    const topReveal = 48;
-    const threshold = 14;
-    const lockMs = 280;
-    const ignoreJump = 100;
-
-    let lastY = Math.max(0, window.scrollY);
-    let accumulated = 0;
-    let lockedUntil = 0;
-    let isHidden = false;
-    let frame = 0;
-
-    const onScroll = () => {
-      if (frame) return;
-
-      frame = window.requestAnimationFrame(() => {
-        frame = 0;
-        const now = performance.now();
-        const y = Math.max(0, window.scrollY);
-        const delta = y - lastY;
-        lastY = y;
-
-        if (now < lockedUntil) {
-          accumulated = 0;
-          return;
-        }
-
-        if (y <= topReveal) {
-          accumulated = 0;
-          if (isHidden) {
-            isHidden = false;
-            lockedUntil = now + lockMs;
-            setHidden(false);
-          }
-          return;
-        }
-
-        if (Math.abs(delta) > ignoreJump) {
-          accumulated = 0;
-          return;
-        }
-
-        if ((accumulated > 0 && delta < 0) || (accumulated < 0 && delta > 0)) {
-          accumulated = 0;
-        }
-        accumulated += delta;
-
-        if (accumulated > threshold && !isHidden) {
-          isHidden = true;
-          accumulated = 0;
-          lockedUntil = now + lockMs;
-          setHidden(true);
-        } else if (accumulated < -threshold && isHidden) {
-          isHidden = false;
-          accumulated = 0;
-          lockedUntil = now + lockMs;
-          setHidden(false);
-        }
-      });
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.cancelAnimationFrame(frame);
-    };
-  }, [disabled]);
-
-  return hidden;
-}
 
 export default function Collection({
   albums,
