@@ -29,7 +29,7 @@ function isMobileSheet() {
   return window.matchMedia("(max-width: 639px)").matches;
 }
 
-export function useSheetDismiss(onClose: () => void) {
+export function useSheetDismiss() {
   const [closing, setClosing] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [dragging, setDragging] = useState(false);

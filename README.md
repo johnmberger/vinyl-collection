@@ -16,7 +16,7 @@ npm install
 cp .env.example .env.local
 ```
 
-Then fill in:
+Then set up:
 
 ```env
 DISCOGS_USER_TOKEN=your-discogs-token

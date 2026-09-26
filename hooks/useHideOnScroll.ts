@@ -11,10 +11,7 @@ export function useHideOnScroll(disabled: boolean) {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    if (disabled) {
-      setHidden(false);
-      return;
-    }
+    if (disabled) return;
 
     let lastY = Math.max(0, window.scrollY);
     let accumulated = 0;
@@ -78,5 +75,5 @@ export function useHideOnScroll(disabled: boolean) {
     };
   }, [disabled]);
 
-  return hidden;
+  return disabled ? false : hidden;
 }

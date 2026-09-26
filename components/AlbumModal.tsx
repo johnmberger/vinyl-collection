@@ -36,7 +36,7 @@ export default function AlbumModal({
     coverPointer,
     markEntered,
     finishSettling,
-  } = useSheetDismiss(onClose);
+  } = useSheetDismiss();
 
   const cover = album.coverUrl || album.thumbUrl;
 
