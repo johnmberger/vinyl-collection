@@ -1,12 +1,12 @@
 "use client";
 
-import type { TransitionEvent as ReactTransitionEvent } from "react";
+import { useState, type TransitionEvent as ReactTransitionEvent } from "react";
 import Image from "next/image";
 import AlbumDetails from "@/components/AlbumDetails";
 import { CloseIcon } from "@/components/icons";
 import { useSheetDismiss } from "@/hooks/useSheetDismiss";
 import type { Album } from "@/lib/discogs";
-import { COVER_PLACEHOLDER, MODAL_IMAGE_SIZES } from "@/lib/images";
+import { MODAL_IMAGE_SIZES } from "@/lib/images";
 
 const SHEET_EASE = "320ms cubic-bezier(0.32, 0.72, 0, 1)";
 
@@ -37,8 +37,10 @@ export default function AlbumModal({
     markEntered,
     finishSettling,
   } = useSheetDismiss();
+  const [loadedCover, setLoadedCover] = useState<string | null>(null);
 
   const cover = album.coverUrl || album.thumbUrl;
+  const coverReady = Boolean(cover && loadedCover === cover);
 
   return (
     <div className="fixed inset-x-0 top-0 z-50 flex h-lvh flex-col pt-[calc(env(safe-area-inset-top,0px)+2.75rem)] sm:inset-0 sm:h-auto sm:items-center sm:justify-center sm:p-6">
@@ -133,7 +135,7 @@ export default function AlbumModal({
           ref={sheetRef}
           className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain sm:min-h-min sm:flex-none sm:overflow-visible"
         >
-          <div className="grid sm:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
+          <div className="grid sm:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)] sm:items-start">
             <div
               className={`cursor-grab select-none sm:cursor-default sm:touch-auto sm:select-auto sm:active:cursor-default ${
                 dragging ? "touch-none active:cursor-grabbing" : "touch-pan-y"
@@ -142,18 +144,28 @@ export default function AlbumModal({
             >
               <div className="relative aspect-square w-full overflow-hidden bg-background sm:rounded-tl-2xl">
                 {cover ? (
-                  <Image
-                    src={cover}
-                    alt={`${album.artist} - ${album.title}`}
-                    fill
-                    sizes={MODAL_IMAGE_SIZES}
-                    className="pointer-events-none object-cover"
-                    quality={90}
-                    placeholder={COVER_PLACEHOLDER}
-                    loading="eager"
-                    fetchPriority="high"
-                    draggable={false}
-                  />
+                  <>
+                    {!coverReady ? (
+                      <div
+                        className="absolute inset-0 animate-cover-shimmer bg-[linear-gradient(90deg,#1a1714_0%,#24201c_45%,#1a1714_90%)] bg-size-[200%_100%]"
+                        aria-hidden
+                      />
+                    ) : null}
+                    <Image
+                      src={cover}
+                      alt={`${album.artist} - ${album.title}`}
+                      fill
+                      sizes={MODAL_IMAGE_SIZES}
+                      className={`pointer-events-none object-cover transition-opacity duration-300 ${
+                        coverReady ? "opacity-100" : "opacity-0"
+                      }`}
+                      quality={90}
+                      loading="eager"
+                      fetchPriority="high"
+                      draggable={false}
+                      onLoad={() => setLoadedCover(cover)}
+                    />
+                  </>
                 ) : (
                   <div className="flex h-full items-center justify-center text-sm text-muted">
                     No cover

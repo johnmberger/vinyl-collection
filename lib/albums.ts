@@ -52,6 +52,31 @@ export function versionsOf(album: Album, collection: Album[]): Album[] {
     );
 }
 
+export function moreByArtist(album: Album, collection: Album[]): Album[] {
+  const key = versionKey(album);
+  const byTitle = new Map<string, Album>();
+
+  for (const item of collection) {
+    if (item.artist !== album.artist) continue;
+    const itemKey = versionKey(item);
+    if (itemKey === key) continue;
+
+    const existing = byTitle.get(itemKey);
+    if (
+      !existing ||
+      (item.year ?? 0) < (existing.year ?? 0) ||
+      ((item.year ?? 0) === (existing.year ?? 0) && item.id < existing.id)
+    ) {
+      byTitle.set(itemKey, item);
+    }
+  }
+
+  return [...byTitle.values()].sort(
+    (a, b) =>
+      a.title.localeCompare(b.title) || (a.year ?? 0) - (b.year ?? 0),
+  );
+}
+
 export function editionTags(album: Album): string[] {
   return album.formatDescriptions.filter(
     (description) => !GENERIC_FORMAT.has(description.toLowerCase())

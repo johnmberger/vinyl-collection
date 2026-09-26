@@ -13,20 +13,21 @@
   --color-accent: #d4a574;
   --color-surface: #1a1714;
   --color-surface-hover: #24201c;
-  --font-sans: var(--font-geist-sans);
-  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-dm-sans);
+  --font-display: var(--font-newsreader);
   --animate-backdrop-in: backdrop-in 180ms ease-out;
   --animate-backdrop-out: backdrop-out 220ms ease-in forwards;
   --animate-modal-in: modal-in 220ms ease-out;
   --animate-modal-out: modal-out 180ms ease-in forwards;
   --animate-sheet-in: sheet-in 380ms cubic-bezier(0.32, 0.72, 0, 1);
   --animate-sheet-out: sheet-out 320ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  --animate-cover-shimmer: cover-shimmer 1.2s ease-in-out infinite;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 button,
@@ -113,5 +114,14 @@ a[aria-disabled="true"] {
   }
   to {
     transform: translateY(100%);
+  }
+}
+
+@keyframes cover-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
   }
 }

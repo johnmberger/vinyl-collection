@@ -8,28 +8,28 @@ export const size = {
 };
 export const contentType = "image/png";
 
-async function loadFraunces(text: string) {
+async function loadNewsreader(text: string) {
   const css = await fetch(
-    `https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&text=${encodeURIComponent(text)}`,
+    `https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500&text=${encodeURIComponent(text)}`,
     {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1",
       },
-    }
+    },
   ).then((response) => response.text());
 
   const match = css.match(
-    /src: url\((.+?)\) format\('(opentype|truetype)'\)/
+    /src: url\((.+?)\) format\('(opentype|truetype)'\)/,
   );
 
   if (!match) {
-    throw new Error("Could not load Fraunces for the social card");
+    throw new Error("Could not load Newsreader for the social card");
   }
 
   const font = await fetch(match[1]);
   if (!font.ok) {
-    throw new Error("Could not download Fraunces for the social card");
+    throw new Error("Could not download Newsreader for the social card");
   }
 
   return font.arrayBuffer();
@@ -38,7 +38,7 @@ async function loadFraunces(text: string) {
 export default async function Image() {
   const title = getSiteTitle();
   const host = getSiteHost();
-  const fraunces = await loadFraunces(title);
+  const newsreader = await loadNewsreader(title);
 
   return new ImageResponse(
     (
@@ -114,7 +114,7 @@ export default async function Image() {
               display: "flex",
               color: "#f3ead8",
               fontSize: 96,
-              fontFamily: "Fraunces",
+              fontFamily: "Newsreader",
               letterSpacing: -2,
               lineHeight: 1.1,
             }}
@@ -140,12 +140,12 @@ export default async function Image() {
       ...size,
       fonts: [
         {
-          name: "Fraunces",
-          data: fraunces,
+          name: "Newsreader",
+          data: newsreader,
           style: "normal",
           weight: 500,
         },
       ],
-    }
+    },
   );
 }
