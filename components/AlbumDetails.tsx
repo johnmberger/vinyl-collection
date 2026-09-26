@@ -16,6 +16,12 @@ import {
   versionsOf,
 } from "@/lib/albums";
 
+const FOOTER_EYEBROW =
+  "text-[11px] leading-5 tracking-wide text-muted uppercase";
+
+const DISCOGS_LINK =
+  "inline-flex cursor-pointer items-center gap-1.5 text-sm leading-5 text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:decoration-accent";
+
 type AlbumDetailsProps = {
   album: Album;
   collection: Album[];
@@ -53,6 +59,20 @@ function formatDateAdded(value: string) {
     day: "numeric",
     year: "numeric",
   });
+}
+
+function AddedLabel({ value }: { value: string | null }) {
+  if (!value) return null;
+  return <p className={FOOTER_EYEBROW}>Added {value}</p>;
+}
+
+function DiscogsLink({ href }: { href: string }) {
+  return (
+    <a href={href} target="_blank" rel="noreferrer" className={DISCOGS_LINK}>
+      View on Discogs
+      <ExternalIcon />
+    </a>
+  );
 }
 
 export default function AlbumDetails({
@@ -107,9 +127,7 @@ export default function AlbumDetails({
             <div className="flex min-w-0 flex-1 flex-col gap-5">
               {siblings.length > 0 ? (
                 <div>
-                  <p className="text-[11px] leading-5 tracking-wide text-muted uppercase">
-                    Other versions
-                  </p>
+                  <p className={FOOTER_EYEBROW}>Other versions</p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {siblings.map((sibling) => (
                       <Chip key={sibling.id} onClick={() => onSelect(sibling)}>
@@ -124,7 +142,7 @@ export default function AlbumDetails({
 
               {related.length > 0 ? (
                 <div>
-                  <p className="text-[11px] leading-5 tracking-wide text-muted uppercase">
+                  <p className={FOOTER_EYEBROW}>
                     Other {album.artist} albums
                   </p>
                   <ul className="mt-2 space-y-1.5">
@@ -152,40 +170,14 @@ export default function AlbumDetails({
             </div>
 
             <div className="flex shrink-0 flex-col gap-2 sm:items-end">
-              {dateAdded ? (
-                <p className="text-[11px] leading-5 tracking-wide text-muted uppercase">
-                  Added {dateAdded}
-                </p>
-              ) : null}
-              <a
-                href={discogsUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex cursor-pointer items-center gap-1.5 text-sm leading-5 text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:decoration-accent"
-              >
-                View on Discogs
-                <ExternalIcon />
-              </a>
+              <AddedLabel value={dateAdded} />
+              <DiscogsLink href={discogsUrl} />
             </div>
           </div>
         ) : (
           <div className="flex items-baseline justify-between gap-4">
-            {dateAdded ? (
-              <p className="text-[11px] leading-5 tracking-wide text-muted uppercase">
-                Added {dateAdded}
-              </p>
-            ) : (
-              <span />
-            )}
-            <a
-              href={discogsUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex cursor-pointer items-center gap-1.5 text-sm leading-5 text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:decoration-accent"
-            >
-              View on Discogs
-              <ExternalIcon />
-            </a>
+            <AddedLabel value={dateAdded} />
+            <DiscogsLink href={discogsUrl} />
           </div>
         )}
       </div>

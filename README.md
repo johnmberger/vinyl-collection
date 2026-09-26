@@ -43,8 +43,11 @@ Open [http://localhost:3000](http://localhost:3000).
    - `SITE_TITLE` (optional)
    - `SITE_URL` (optional, defaults to `https://vinyl.johnberger.dev`)
 4. Deploy
+5. Enable **Web Analytics** in the Vercel project settings (Analytics → Enable)
 
 Keep the Discogs token server-only. Do not prefix it with `NEXT_PUBLIC_`.
+
+Album detail URLs look like `/album/artist-album-title`. Duplicate pressings append the Discogs release id.
 
 The site is excluded from search indexing and AI scrapers that honor robots rules (`noindex`, `robots.txt`, and `X-Robots-Tag`). There is no sitemap.
 

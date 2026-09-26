@@ -1,36 +1,64 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AlbumCard from "@/components/AlbumCard";
 import AlbumModal from "@/components/AlbumModal";
 import { ChevronDownIcon, CloseIcon, SearchIcon, SortIcon } from "@/components/icons";
 import { useHideOnScroll } from "@/hooks/useHideOnScroll";
 import { filterAndSortAlbums, type SortOption } from "@/lib/albums";
-import { ABOVE_FOLD_COUNT } from "@/lib/images";
 import type { Album } from "@/lib/discogs";
+import { ABOVE_FOLD_COUNT } from "@/lib/images";
+import { albumPath, albumSlugFromPathname, findAlbumBySlug } from "@/lib/slugs";
 
 type CollectionProps = {
   albums: Album[];
   title: string;
   username: string;
+  initialSlug?: string;
 };
 
 export default function Collection({
   albums,
   title,
   username,
+  initialSlug,
 }: CollectionProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("title-asc");
-  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(() =>
+    initialSlug ? findAlbumBySlug(initialSlug, albums) : null,
+  );
   const [searchFocused, setSearchFocused] = useState(false);
   const toolbarHidden = useHideOnScroll(
     searchFocused || selectedAlbum !== null,
   );
 
+  useEffect(() => {
+    const onPopState = () => {
+      const slug = albumSlugFromPathname(window.location.pathname);
+      setSelectedAlbum(slug ? findAlbumBySlug(slug, albums) : null);
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [albums]);
+
+  const selectAlbum = useCallback(
+    (album: Album) => {
+      setSelectedAlbum(album);
+      window.history.pushState(null, "", albumPath(album, albums));
+    },
+    [albums],
+  );
+
+  const closeAlbum = useCallback(() => {
+    setSelectedAlbum(null);
+    window.history.pushState(null, "", "/");
+  }, []);
+
   const visibleAlbums = useMemo(
     () => filterAndSortAlbums(albums, searchQuery, sortBy),
-    [albums, searchQuery, sortBy]
+    [albums, searchQuery, sortBy],
   );
 
   return (
@@ -47,7 +75,7 @@ export default function Collection({
       </header>
 
       <div
-        className={`sticky top-0 z-20 overflow-hidden bg-background/95 backdrop-blur-md transition-[max-height] duration-200 ease-out [transform:translateZ(0)] md:max-h-24 md:pointer-events-auto ${
+        className={`sticky top-0 z-20 overflow-hidden bg-background/95 backdrop-blur-md transition-[max-height] duration-200 ease-out transform-[translateZ(0)] md:max-h-24 md:pointer-events-auto ${
           toolbarHidden
             ? "pointer-events-none max-h-0"
             : "max-h-44 sm:max-h-24"
@@ -114,7 +142,7 @@ export default function Collection({
                 album={album}
                 collection={albums}
                 priority={index < ABOVE_FOLD_COUNT}
-                onSelect={setSelectedAlbum}
+                onSelect={selectAlbum}
               />
             ))}
           </div>
@@ -139,8 +167,8 @@ export default function Collection({
         <AlbumModal
           album={selectedAlbum}
           collection={albums}
-          onSelect={setSelectedAlbum}
-          onClose={() => setSelectedAlbum(null)}
+          onSelect={selectAlbum}
+          onClose={closeAlbum}
         />
       ) : null}
     </div>

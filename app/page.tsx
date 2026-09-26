@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Collection from "@/components/Collection";
 import SetupNotice from "@/components/SetupNotice";
-import { getCollection, getDiscogsConfig } from "@/lib/discogs";
-import { getSiteMetadata, getSiteTitle } from "@/lib/site";
+import { loadCollectionPage } from "@/lib/collection-page";
+import { getSiteMetadata } from "@/lib/site";
 
 export const revalidate = 86400;
 
@@ -11,16 +11,17 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const { isConfigured, username } = getDiscogsConfig();
+  const page = await loadCollectionPage();
 
-  if (!isConfigured) {
+  if (!page.configured) {
     return <SetupNotice />;
   }
 
-  const albums = await getCollection();
-  const title = getSiteTitle();
-
   return (
-    <Collection albums={albums} title={title} username={username} />
+    <Collection
+      albums={page.albums}
+      title={page.title}
+      username={page.username}
+    />
   );
 }
